@@ -1,0 +1,46 @@
+{
+  "timeout": {
+    "description": "API请求超时(毫秒)",
+    "type": "int",
+    "hint": "请求 whatslink.info API 的超时时间",
+    "default": 10000
+  },
+  "useForward": {
+    "description": "使用合并转发",
+    "type": "bool",
+    "hint": "是否尝试使用合并转发发送结果（仅限支持的平台）",
+    "default": true
+  },
+  "showScreenshot": {
+    "description": "显示截图",
+    "type": "bool",
+    "hint": "是否在结果中显示预览截图",
+    "default": true
+  },
+  "max_stitch_count": {
+    "description": "拼接图片数量",
+    "type": "int",
+    "hint": "拼接长图时最多使用的图片数量",
+    "default": 4
+  },
+  "edge_ratio": {
+    "description": "边缘厚度上限比例",
+    "type": "float",
+    "default": 0.06,
+    "hint": "边缘黑色图案厚度占图片短边的上限比例（0.01-0.2）",
+    "min": 0.01,
+    "max": 0.2
+  },
+  "save_failed_images": {
+    "description": "保存风控失败图片",
+    "type": "bool",
+    "default": true,
+    "hint": "拼接/边缘图案/噪声发送失败时保存处理后的图片"
+  },
+  "failed_images_dir": {
+    "description": "失败图片保存目录",
+    "type": "string",
+    "default": "failed_images",
+    "hint": "保存目录（相对插件目录或绝对路径）"
+  }
+}
