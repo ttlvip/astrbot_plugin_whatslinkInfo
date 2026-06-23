@@ -1,6 +1,9 @@
 name: astrbot_plugin_whatslinkInfo
-desc: 磁链解析插件，使用 whatslink.info API 生成资源预览并支持截图与合并转发
-version: v1.0.0
+desc: 磁链解析插件，使用 whatslink.info API 生成资源预览，支持截图拼接/模糊/合并转发，提供 help/test/config 命令
+version: v2.0.0
 author: ttlvip
 repo: https://github.com/ttlvip/astrbot_plugin_whatslinkInfo
+requirements:
+  - Pillow>=10.0.0
+  - aiohttp>=3.9.0
 
