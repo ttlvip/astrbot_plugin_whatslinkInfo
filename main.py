@@ -16,7 +16,7 @@ AstrBot 插件：whatslink.info 磁链解析器 (v2.0.0)
 ================================================================================
                               配  置  项
 ================================================================================
-所有配置项通过 AstrBot 插件配置页面管理，位于 plugin_settings.astrbot_plugin_whatslinkInfo：
+所有配置项通过 AstrBot WebUI 插件配置页面管理（_conf_schema.json）：
 
   merge_forward   (boolean, 默认 false)  是否使用合并转发模式（QQ/OneBot）
   no_wake_word    (boolean, 默认 false)  是否免唤醒词触发（true=任意消息触发）
@@ -73,7 +73,7 @@ import aiohttp
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.core.message.message_event_result import MessageEventResult
 from astrbot.api.star import Context, Star, register
-from astrbot.api import logger
+from astrbot.api import AstrBotConfig, logger
 from astrbot.api.message_components import Plain, Image, Node, Nodes
 
 # ---------------------------------------------------------------------------
@@ -94,19 +94,6 @@ except ImportError:
 
 MAGNET_RE = re.compile(r"(magnet:\?xt=urn:btih:[A-Za-z0-9]+)", re.IGNORECASE)
 API_URL = "https://whatslink.info/api/v1/link"
-
-# 插件配置 key（在 plugin_settings 下的键名）
-PLUGIN_CONFIG_KEY = "astrbot_plugin_whatslinkInfo"
-
-# 默认配置值
-DEFAULT_CONFIG = {
-    "merge_forward": False,
-    "no_wake_word": False,
-    "timeout": 10,
-    "show_screenshots": True,
-    "blur_screenshots": False,
-    "blur_intensity": 3,
-}
 
 # API 调用最小间隔（秒），防止触发 whatslink.info 风控
 API_COOLDOWN_SEC = 3.0
@@ -165,22 +152,6 @@ def _make_image_from_file(file_path: str) -> Image:
         return Image.fromURL(f"file:///{file_path.replace(chr(92), '/')}")
 
 
-def _clamp_blur_intensity(value) -> int:
-    """将模糊强度限制在 1-9 范围内。
-
-    参数:
-        value: 用户配置的模糊强度值。
-
-    返回:
-        钳制后的整数值 (1-9)。
-    """
-    try:
-        v = int(value)
-    except (ValueError, TypeError):
-        return 3
-    return max(1, min(9, v))
-
-
 # ===========================================================================
 #  插  件  主  类
 # ===========================================================================
@@ -193,9 +164,10 @@ class WhatslinkPlugin(Star):
     支持截图拼接、模糊处理、合并转发以及命令交互。
     """
 
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         self.context = context
+        self.config = config  # AstrBotConfig 继承自 dict，可直接通过 key 访问配置项
         # 频率控制：记录上一次 API 调用时间戳（Unix 秒）与异步锁
         self._last_api_call_time: float = 0.0
         self._api_lock = asyncio.Lock()
@@ -211,38 +183,6 @@ class WhatslinkPlugin(Star):
     async def terminate(self):
         """插件被卸载/停用时调用。"""
         logger.info("whatslinkInfo 插件已终止")
-
-    # ------------------------------------------------------------------
-    #  配  置  读  取
-    # ------------------------------------------------------------------
-
-    def _get_config(self, event: AstrMessageEvent) -> dict:
-        """从 AstrBot 全局配置中读取本插件的配置，缺失项使用默认值。
-
-        参数:
-            event: AstrBot 消息事件，用于获取 unified_msg_origin。
-
-        返回:
-            合并默认值后的配置字典。
-        """
-        try:
-            cfg = self.context.get_config(umo=event.unified_msg_origin)
-        except Exception:
-            cfg = {}
-        plugin_cfg = cfg.get("plugin_settings", {}).get(PLUGIN_CONFIG_KEY, {})
-        # 合并默认值
-        merged = dict(DEFAULT_CONFIG)
-        for key in DEFAULT_CONFIG:
-            if key in plugin_cfg:
-                merged[key] = plugin_cfg[key]
-        # 类型矫正
-        merged["merge_forward"] = bool(merged["merge_forward"])
-        merged["no_wake_word"] = bool(merged["no_wake_word"])
-        merged["timeout"] = int(merged["timeout"]) if merged["timeout"] else 10
-        merged["show_screenshots"] = bool(merged["show_screenshots"])
-        merged["blur_screenshots"] = bool(merged["blur_screenshots"])
-        merged["blur_intensity"] = _clamp_blur_intensity(merged.get("blur_intensity", 3))
-        return merged
 
     # ------------------------------------------------------------------
     #  唤  醒  词  检  测
@@ -654,8 +594,7 @@ class WhatslinkPlugin(Star):
             f"  blur_screenshots: {cfg['blur_screenshots']}{blur_note}\n"
             f"  blur_intensity  : {cfg['blur_intensity']} (1-9)\n"
             "\n"
-            "【配置方法】在 AstrBot 插件配置页面修改上述参数。\n"
-            "  配置路径: plugin_settings → astrbot_plugin_whatslinkInfo"
+            "【配置方法】在 AstrBot WebUI → 插件管理 → 点击本插件进行配置。"
         )
 
     def _build_config_text(self, cfg: dict) -> str:
@@ -678,7 +617,7 @@ class WhatslinkPlugin(Star):
             f"  blur_screenshots : {cfg['blur_screenshots']}{blur_note}\n"
             f"  blur_intensity   : {cfg['blur_intensity']} (范围 1-9)\n"
             "\n"
-            "可通过 AstrBot 插件配置页面修改以上参数。"
+            "可通过 AstrBot WebUI → 插件管理 → 点击本插件进行配置。"
         )
 
     async def _handle_command(self, event: AstrMessageEvent, cfg: dict):
@@ -843,9 +782,9 @@ class WhatslinkPlugin(Star):
         if not text.strip():
             return
 
-        # 读取配置
-        cfg = self._get_config(event)
-        no_wake_word = cfg["no_wake_word"]
+        # 读取配置（通过 _conf_schema.json + AstrBotConfig 注入）
+        cfg = self.config
+        no_wake_word = cfg.get("no_wake_word", False)
 
         # ----- 命令处理 -----
         if text.strip().lower().startswith(CMD_PREFIX) or text.strip().lower().startswith("whatslink "):

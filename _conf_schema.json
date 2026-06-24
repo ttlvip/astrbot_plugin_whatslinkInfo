@@ -1,0 +1,38 @@
+{
+  "merge_forward": {
+    "description": "合并转发模式（QQ/OneBot）",
+    "type": "bool",
+    "default": false,
+    "hint": "开启后多张截图将在转发消息中逐张展示；关闭后截图将垂直拼接为一张图片"
+  },
+  "no_wake_word": {
+    "description": "免唤醒词触发",
+    "type": "bool",
+    "default": false,
+    "hint": "开启后任意消息中的磁链都会触发解析；关闭后群聊仅响应命令消息或 @机器人，私聊始终触发"
+  },
+  "timeout": {
+    "description": "API 请求超时（秒）",
+    "type": "int",
+    "default": 10,
+    "hint": "网络较差时可适当调大，建议 5-30 秒"
+  },
+  "show_screenshots": {
+    "description": "显示资源截图",
+    "type": "bool",
+    "default": true,
+    "hint": "关闭后仅返回文本信息（名称、文件数量、大小），不会下载截图"
+  },
+  "blur_screenshots": {
+    "description": "模糊处理截图",
+    "type": "bool",
+    "default": false,
+    "hint": "开启后所有截图将先经过高斯模糊再发送。依赖 Pillow 库，若未安装则自动跳过"
+  },
+  "blur_intensity": {
+    "description": "模糊强度（1-9）",
+    "type": "int",
+    "default": 3,
+    "hint": "数值越大模糊程度越高。仅当「模糊处理截图」开启时生效"
+  }
+}

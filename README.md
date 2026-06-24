@@ -97,8 +97,8 @@ _✨ [astrbot](https://github.com/AstrBotDevs/AstrBot) 磁链解析插件 v2.0.0
 
 ## ⚙️ 配置项
 
-你可以在 AstrBot 的插件配置页面找到本插件的设置项。  
-配置路径: `plugin_settings` → `astrbot_plugin_whatslinkInfo`
+所有配置通过 AstrBot WebUI 管理：**插件管理 → 点击 `astrbot_plugin_whatslinkInfo`**。
+插件目录下的 `_conf_schema.json` 定义了配置 Schema，修改后即时生效。
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
@@ -120,17 +120,7 @@ _✨ [astrbot](https://github.com/AstrBotDevs/AstrBot) 磁链解析插件 v2.0.0
 
 ### 配置示例
 
-```yaml
-# AstrBot 配置文件中的片段
-plugin_settings:
-  astrbot_plugin_whatslinkInfo:
-    merge_forward: true
-    no_wake_word: false
-    timeout: 15
-    show_screenshots: true
-    blur_screenshots: false
-    blur_intensity: 3
-```
+在 AstrBot WebUI 插件管理页面中直接修改即可，无需编辑配置文件。
 
 ## 🔧 依赖
 
