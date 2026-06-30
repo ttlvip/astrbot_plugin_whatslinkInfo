@@ -14,6 +14,7 @@ _✨ [astrbot](https://github.com/AstrBotDevs/AstrBot) 磁链解析插件 v2.0.0
 
 </div>
 
+<h1>项目由完全由ai完成，并且由于工作原因，不定时更新和修bug。目前还处于不可用状态</h1>
 
 一个 [Astrbot](https://github.com/AstrBotDevs/AstrBot) 插件，它能自动识别聊天中的磁力链接，并调用 [whatslink.info](https://whatslink.info/) 提供的 API 来生成包含资源详情和截图的预览消息。
 
